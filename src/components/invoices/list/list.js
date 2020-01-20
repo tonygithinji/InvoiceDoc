@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import * as cx from "classnames";
 
 const InvoiceList = () => {
@@ -17,7 +18,10 @@ const InvoiceList = () => {
 					</h1>
 				</div>
 				<div>
-					<button className="text-gray-800 border-gray-500 border-2 rounded-lg px-8 py-2 hover:border-gray-700 focus:outline-none">
+					<Link
+						className="text-gray-800 border-gray-500 border-2 rounded-lg px-8 py-2 hover:border-gray-700 focus:outline-none"
+						to="/invoices/new"
+					>
 						<svg
 							className="w-6 h-6 mr-2 -mt-1 inline-block text-gray-600"
 							viewBox="0 0 24 24"
@@ -31,7 +35,7 @@ const InvoiceList = () => {
 							<line x1="5" y1="12" x2="19" y2="12" />
 						</svg>
 						<span>New Invoice</span>
-					</button>
+					</Link>
 				</div>
 			</div>
 
