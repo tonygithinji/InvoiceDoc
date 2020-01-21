@@ -1,7 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import * as cx from "classnames";
 
 const NewInvoice = () => {
+	const invoiceItem = {
+		number: 1,
+		itemName: "",
+		qty: 1,
+		rate: "",
+		vat: 0,
+		amount: 0
+	};
+	const [invoiceItems, setInvoiceItems] = useState([invoiceItem]);
+
+	const handleAddItem = () => {
+		setInvoiceItems([
+			...invoiceItems,
+			{ ...invoiceItem, number: invoiceItems.length + 1 }
+		]);
+	};
+
+	const handleRemoveItem = item => {
+		const items = invoiceItems.filter(
+			_item => _item.number !== item.number
+		);
+
+		setInvoiceItems(items);
+	};
+
 	return (
 		<>
 			<div>
@@ -95,96 +121,112 @@ const NewInvoice = () => {
 				</div>
 
 				<div>
-					<table className="table-auto w-full">
+					<table className="table-fixed w-full">
 						<thead className="border-b-2 border-gray-300">
 							<tr>
-								<th className="py-4 font-normal text-gray-500">
+								<th className="w-16 py-4 font-normal text-gray-500">
 									No.
 								</th>
-								<th className="py-4 font-normal text-gray-500">
+								<th className="w-1/3 py-4 font-normal text-gray-500">
 									Item
 								</th>
 								<th className="py-4 font-normal text-gray-500 text-right">
-									Qty
+									Qty ($)
 								</th>
 								<th className="py-4 font-normal text-gray-500 text-right">
-									Rate
+									Rate ($)
 								</th>
 								<th className="py-4 font-normal text-gray-500 text-right">
-									VAT
+									VAT ($)
 								</th>
 								<th className="py-4 font-normal text-gray-500 text-right">
 									Amount
 								</th>
+								<th className="w-16 py-4 font-normal text-gray-500 text-center">
+									<span />
+								</th>
 							</tr>
 						</thead>
 						<tbody>
-							<tr className="border-b border-gray-300">
-								<td className="py-6 font-normal text-gray-700 text-center">
-									1
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-center">
-									Printer
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									2
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									$ 2,000.00
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									$ 0.00
-								</td>
-								<td className="py-6 font-semibold text-gray-700 text-right">
-									$ 4,000.00
-								</td>
-							</tr>
-							<tr className="border-b border-gray-300">
-								<td className="py-6 font-normal text-gray-700 text-center">
-									1
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-center">
-									Printer
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									2
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									$ 2,000.00
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									$ 0.00
-								</td>
-								<td className="py-6 font-semibold text-gray-700 text-right">
-									$ 4,000.00
-								</td>
-							</tr>
-							<tr className="border-b border-gray-300">
-								<td className="py-6 font-normal text-gray-700 text-center">
-									1
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-center">
-									Printer
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									2
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									$ 2,000.00
-								</td>
-								<td className="py-6 font-normal text-gray-700 text-right">
-									$ 0.00
-								</td>
-								<td className="py-6 font-semibold text-gray-700 text-right">
-									$ 4,000.00
-								</td>
-							</tr>
+							{invoiceItems.map((item, index) => (
+								<tr
+									className="border-b border-gray-300"
+									key={item.number}
+								>
+									<td className="py-6 font-normal text-gray-700 text-center">
+										{index + 1}
+									</td>
+									<td className="py-6 font-normal text-gray-700 text-center">
+										<input
+											type="text"
+											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-center w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
+										/>
+									</td>
+									<td className="py-6 font-normal text-gray-700 text-right">
+										<input
+											type="text"
+											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-right w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
+										/>
+									</td>
+									<td className="py-6 font-normal text-gray-700 text-right">
+										<input
+											type="text"
+											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-right w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
+											value={item.qty}
+										/>
+									</td>
+									<td className="py-6 font-normal text-gray-700 text-right">
+										{item.vat}
+									</td>
+									<td className="py-6 font-semibold text-gray-700 text-right">
+										{item.amount}
+									</td>
+									<td className="py-6 font-semibold text-gray-700 text-center">
+										<button
+											onClick={() =>
+												handleRemoveItem(item)
+											}
+											className={cx({
+												hidden: index === 0
+											})}
+										>
+											<svg
+												className="w-4 h-4 text-gray-600 inline-block cursor-pointer hover:text-gray-800"
+												viewBox="0 0 24 24"
+												fill="none"
+												stroke="currentColor"
+												strokeWidth="2"
+												strokeLinecap="round"
+												strokeLinejoin="round"
+											>
+												<polyline points="3 6 5 6 21 6" />
+												<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+												<line
+													x1="10"
+													y1="11"
+													x2="10"
+													y2="17"
+												/>
+												<line
+													x1="14"
+													y1="11"
+													x2="14"
+													y2="17"
+												/>
+											</svg>
+										</button>
+									</td>
+								</tr>
+							))}
 						</tbody>
 					</table>
 
 					<div className="my-4 flex">
 						<div className="flex-1">
-							<button className="text-gray-800 border-gray-500 border-2 rounded-lg px-4 py-2 hover:border-gray-700 focus:outline-none">
+							<button
+								className="text-gray-800 border-gray-500 border-2 rounded-lg px-4 py-2 hover:border-gray-700 focus:outline-none"
+								onClick={handleAddItem}
+							>
 								<svg
 									className="w-6 h-6 mr-2 -mt-1 inline-block text-gray-600"
 									viewBox="0 0 24 24"
@@ -208,7 +250,7 @@ const NewInvoice = () => {
 										Subtotal
 									</div>
 									<div className="text-gray-700 font-semibold">
-										$ 4,000.00
+										$ 0.00
 									</div>
 								</div>
 								<div className="flex justify-between my-4 pb-4 border-b border-gray-300">
@@ -220,7 +262,7 @@ const NewInvoice = () => {
 								<div className="flex justify-between my-4">
 									<div className="text-gray-700">Total</div>
 									<div className="text-gray-700 font-semibold">
-										$ 4,000.00
+										$ 0.00
 									</div>
 								</div>
 							</div>
