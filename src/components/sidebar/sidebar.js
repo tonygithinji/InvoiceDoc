@@ -65,11 +65,11 @@ const Sidebar = () => (
 						<span className="text-gray-700">Invoices</span>
 					</NavLink>
 				</li>
-				<li className="mt-2 mb-2 rounded-lg">
+				<li className="mt-2 mb-2">
 					<NavLink
 						to="/clients"
 						activeClassName="bg-white font-semibold"
-						className="block px-4 py-4"
+						className="block px-4 py-4 rounded-lg"
 					>
 						<svg
 							className="w-6 h-6 mr-2 inline-block text-gray-600 stroke-current"
@@ -88,11 +88,11 @@ const Sidebar = () => (
 						<span className="text-gray-700">Clients</span>
 					</NavLink>
 				</li>
-				<li className="mt-2 mb-2 rounded-lg">
+				<li className="mt-2 mb-2">
 					<NavLink
-						to="/products"
+						to="/items"
 						activeClassName="bg-white font-semibold"
-						className="block px-4 py-4"
+						className="block px-4 py-4 rounded-lg"
 					>
 						<svg
 							className="w-6 h-6 mr-2 inline-block text-gray-600 stroke-current"
@@ -106,14 +106,14 @@ const Sidebar = () => (
 							<path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
 							<line x1="7" y1="7" x2="7.01" y2="7" />
 						</svg>
-						<span className="text-gray-700">Products/Services</span>
+						<span className="text-gray-700">Items</span>
 					</NavLink>
 				</li>
-				<li className="mt-2 mb-2 rounded-lg">
+				<li className="mt-2 mb-2">
 					<NavLink
 						to="/settings"
 						activeClassName="bg-white font-semibold"
-						className="block px-4 py-4"
+						className="block px-4 py-4 rounded-lg"
 					>
 						<svg
 							className="w-6 h-6 mr-2 inline-block text-gray-600 stroke-current"
