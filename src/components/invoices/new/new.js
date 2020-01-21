@@ -56,11 +56,11 @@ const NewInvoice = () => {
 					</Link>
 				</div>
 				<div>
-					<button className="text-gray-800 border-gray-500 border-2 rounded-lg px-4 py-2 mr-2 hover:border-gray-700 focus:outline-none">
-						Save as Draft
-					</button>
-					<button className="text-white border-gray-600 border-2 rounded-lg px-8 py-2 bg-gray-600 hover:bg-gray-700 focus:outline-none">
+					<button className="text-white border-gray-700 border-2 rounded-lg px-8 py-2 mr-4 bg-gray-700 hover:bg-gray-800 focus:outline-none">
 						Send
+					</button>
+					<button className="text-gray-800 border-gray-500 border-2 rounded-lg px-4 py-2 hover:border-gray-700 focus:outline-none">
+						Save as Draft
 					</button>
 				</div>
 			</div>
