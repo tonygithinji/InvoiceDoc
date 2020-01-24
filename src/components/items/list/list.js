@@ -1,9 +1,25 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import * as cx from "classnames";
+import { useQuery } from "@apollo/react-hooks";
+import { gql } from "apollo-boost";
+
+const query = gql`
+	{
+		allItems {
+			id
+			name
+			price
+			description
+			unit
+		}
+	}
+`;
 
 const ItemList = () => {
 	const [showFilter, toggleFilter] = useState(false);
+
+	const { loading, data } = useQuery(query);
 
 	const handleToggleFilter = () => {
 		toggleFilter(!showFilter);
@@ -150,42 +166,64 @@ const ItemList = () => {
 				<div className="flex-1" />
 			</div>
 
-			<div className="my-4 bg-white border-2 border-gray-300 rounded-lg">
-				<table className="table-fixed w-full">
-					<thead className="border-b-2 border-gray-300">
-						<tr>
-							<th className="w-1/3 py-4 font-normal text-gray-700">
-								Name
-							</th>
-							<th className="w-1/2 py-4 font-normal text-gray-700">
-								Description
-							</th>
-							<th className="w-64 py-4 font-normal text-gray-700">
-								Rate
-							</th>
-							<th className="w-32 py-4 font-normal text-gray-700">
-								Unit
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr className="border-b border-gray-300 cursor-pointer hover:bg-gray-100">
-							<td className="py-6 font-normal text-gray-700 text-center">
-								Printer
-							</td>
-							<td className="py-6 font-normal text-gray-700 text-center">
-								HP Printer
-							</td>
-							<td className="py-6 font-normal text-gray-700 text-center">
-								$ 2,000.00
-							</td>
-							<td className="py-6 font-normal text-gray-700 text-center">
-								pcs
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			{loading && <div>Loading...</div>}
+
+			{!loading && (
+				<div className="my-4 bg-white border-2 border-gray-300 rounded-lg">
+					<table className="table-fixed w-full">
+						<thead className="border-b-2 border-gray-300">
+							<tr>
+								<th className="w-1/3 py-4 font-normal text-gray-700">
+									Name
+								</th>
+								<th className="w-1/2 py-4 font-normal text-gray-700">
+									Description
+								</th>
+								<th className="w-64 py-4 font-normal text-gray-700">
+									Rate
+								</th>
+								<th className="w-32 py-4 font-normal text-gray-700">
+									Unit
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							{data.allItems &&
+								data.allItems.length > 0 &&
+								data.allItems.map(item => (
+									<tr
+										className="border-b border-gray-300 cursor-pointer hover:bg-gray-100"
+										key={item.id}
+									>
+										<td className="py-6 font-normal text-gray-700 text-center">
+											{item.name}
+										</td>
+										<td className="py-6 font-normal text-gray-700 text-center">
+											{item.description}
+										</td>
+										<td className="py-6 font-normal text-gray-700 text-center">
+											{item.price}
+										</td>
+										<td className="py-6 font-normal text-gray-700 text-center">
+											{item.unit}
+										</td>
+									</tr>
+								))}
+
+							{data.allItems && data.allItems.length === 0 && (
+								<tr>
+									<td
+										colSpan="4"
+										className="py-6 font-normal text-gray-700 text-center"
+									>
+										You have no items
+									</td>
+								</tr>
+							)}
+						</tbody>
+					</table>
+				</div>
+			)}
 		</>
 	);
 };

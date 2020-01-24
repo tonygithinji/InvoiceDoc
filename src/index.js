@@ -3,6 +3,7 @@ import ReactDOM from "react-dom";
 import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "@apollo/react-hooks";
 
+import "toasted-notes/src/styles.css";
 import "./css/index.css";
 import App from "./app";
 
