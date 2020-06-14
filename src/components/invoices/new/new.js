@@ -1,17 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { gql } from "apollo-boost";
+import { useQuery, useLazyQuery } from "@apollo/react-hooks";
 import * as cx from "classnames";
+import * as functions from "../../../functions/invoice";
+import * as queries from "./queries";
 
 const NewInvoice = () => {
 	const invoiceItem = {
 		number: 1,
-		itemName: "",
-		qty: 1,
+		name: "",
+		qty: "",
 		rate: "",
 		vat: 0,
-		amount: 0
+		amount: 0,
+		showItems: false
 	};
 	const [invoiceItems, setInvoiceItems] = useState([invoiceItem]);
+	const [invoice, setInvoice] = useState({
+		invoiceNumber: "",
+		amount: 0
+	});
+	const [selectedClient, setSelectedClient] = useState({
+		id: "",
+		name: "",
+		phone: "",
+		email: "",
+		showAddClient: ""
+	});
+	//
+	const node = useRef();
 
 	const handleAddItem = () => {
 		setInvoiceItems([
@@ -26,7 +44,119 @@ const NewInvoice = () => {
 		);
 
 		setInvoiceItems(items);
+		setInvoice({
+			...invoice,
+			amount: functions.calculateTotalInvoiceAmount(items)
+		});
 	};
+
+	const handleOnFocus = index => {
+		const items = [...invoiceItems];
+		items[index].showItems = true;
+
+		setInvoiceItems(items);
+	};
+
+	const handleOnBlur = () => {
+		// const items = [...invoiceItems];
+		// items[index].showItems = false;
+		// setInvoiceItems(items);
+	};
+
+	const handleItemSelected = (item, index) => {
+		console.log("item", item);
+		const items = [...invoiceItems];
+		items[index].name = item.name;
+		items[index].qty = 1;
+		items[index].rate = item.price;
+		items[index].amount = item.price;
+		items[index].showItems = false;
+
+		setInvoiceItems(items);
+		setInvoice({
+			...invoice,
+			amount: functions.calculateTotalInvoiceAmount(invoiceItems)
+		});
+	};
+
+	const handleQtyChanged = (e, index) => {
+		const items = [...invoiceItems];
+		items[index].qty = e.target.value;
+
+		setInvoiceItems(functions.calculateLineTotalAmount(index, items));
+		setInvoice({
+			...invoice,
+			amount: functions.calculateTotalInvoiceAmount(invoiceItems)
+		});
+	};
+
+	const handleRateChanged = (e, index) => {
+		const items = [...invoiceItems];
+		items[index].rate = e.target.value;
+
+		setInvoiceItems(functions.calculateLineTotalAmount(index, items));
+		setInvoice({
+			...invoice,
+			amount: functions.calculateTotalInvoiceAmount(invoiceItems)
+		});
+	};
+
+	const handleShowAddClient = () => {
+		setSelectedClient({
+			...selectedClient,
+			showAddClient: !selectedClient.showAddClient
+		});
+	};
+
+	const query = gql`
+		{
+			allItems {
+				id
+				name
+				price
+				unit
+			}
+		}
+	`;
+	const { loading, data } = useQuery(query);
+
+	const [clients, setClients] = useState(null);
+	const [searchClient, searchResult] = useLazyQuery(queries.SEARCH_CLIENT);
+
+	if (searchResult.data) {
+		setClients(searchResult.data.searchClient);
+		console.log(searchResult.data.searchClient);
+	}
+
+	const handleSearchClient = e => {
+		console.log("Query fired");
+		searchClient({
+			variables: {
+				query: e.target.value
+			}
+		});
+	};
+
+	useEffect(() => {
+		const handleClickOutside = e => {
+			if (node.current.contains(e.target)) {
+				// inside click
+				return;
+			}
+			// outside click
+			setSelectedClient({ ...selectedClient, showAddClient: false });
+		};
+
+		if (selectedClient.showAddClient) {
+			document.addEventListener("mousedown", handleClickOutside);
+		} else {
+			document.removeEventListener("mousedown", handleClickOutside);
+		}
+
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [selectedClient, selectedClient.showAddClient]);
 
 	return (
 		<>
@@ -74,6 +204,7 @@ const NewInvoice = () => {
 								type="text"
 								value="Company Name"
 								className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 w-full focus:outline-none focus:border-gray-400"
+								readOnly
 							/>
 						</div>
 						<div>
@@ -81,6 +212,7 @@ const NewInvoice = () => {
 								type="text"
 								value="Address"
 								className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 w-full focus:outline-none focus:border-gray-400"
+								readOnly
 							/>
 						</div>
 					</div>
@@ -90,6 +222,7 @@ const NewInvoice = () => {
 								type="text"
 								value="Phone"
 								className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 w-full focus:outline-none focus:border-gray-400"
+								readOnly
 							/>
 						</div>
 						<div>
@@ -97,6 +230,7 @@ const NewInvoice = () => {
 								type="text"
 								value="Email"
 								className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 w-full focus:outline-none focus:border-gray-400"
+								readOnly
 							/>
 						</div>
 					</div>
@@ -110,13 +244,69 @@ const NewInvoice = () => {
 						<div className="mb-2">INV1001</div>
 						<div>24/12/2019</div>
 					</div>
-					<div className="text-gray-600 min-w-lg">
-						<div className="text-gray-800 font-semibold mb-2">
+					<div className="text-gray-600 min-w-lg w-1/3">
+						{/* <div className="text-gray-800 font-semibold mb-2">
 							Customer Name
 						</div>
 						<div className="mb-2">Address</div>
 						<div className="mb-2">Phone</div>
-						<div>Email</div>
+						<div>Email</div> */}
+						<div
+							className="text-gray-700 px-4 font-semibold mb-2 w-full relative"
+							ref={node}
+						>
+							{!selectedClient.showAddClient && (
+								<button
+									className="py-6 text-center cursor-pointer w-full focus:outline-none"
+									onClick={handleShowAddClient}
+								>
+									<svg
+										className="w-6 h-6 mr-2 -mt-1 inline-block text-gray-600"
+										viewBox="0 0 24 24"
+										fill="none"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									>
+										<line x1="12" y1="5" x2="12" y2="19" />
+										<line x1="5" y1="12" x2="19" y2="12" />
+									</svg>
+									<span>Add Client</span>
+								</button>
+							)}
+
+							{selectedClient.showAddClient && (
+								<div className="py-4 px-2 h-40 absolute top-0 w-full rounded-lg shadow-lg">
+									<input
+										type="text"
+										placeholder="Search client"
+										className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 w-full border-gray-200 focus:outline-none focus:border-gray-400"
+										onChange={handleSearchClient}
+									/>
+									{searchResult.loading && (
+										<div className="py-6 text-center text-gray-600">
+											Loading...
+										</div>
+									)}
+									{clients && clients.length > 0 && (
+										<ul>
+											{clients.map(_client => (
+												<li key={_client.id}>
+													{_client.firstName}{" "}
+													{_client.lastName}
+												</li>
+											))}
+										</ul>
+									)}
+									{clients && clients.length === 0 && (
+										<div className="py-6 text-center text-gray-600">
+											No client found
+										</div>
+									)}
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 
@@ -156,23 +346,59 @@ const NewInvoice = () => {
 									<td className="py-6 font-normal text-gray-700 text-center">
 										{index + 1}
 									</td>
-									<td className="py-6 font-normal text-gray-700 text-center">
+									<td className="py-6 font-normal text-gray-700 relative">
 										<input
 											type="text"
-											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-center w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
+											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
+											defaultValue={item.name}
+											onFocus={() => handleOnFocus(index)}
+											onBlur={() => handleOnBlur(index)}
 										/>
-									</td>
-									<td className="py-6 font-normal text-gray-700 text-right">
-										<input
-											type="text"
-											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-right w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
-										/>
+										{!loading && data.allItems.length > 0 && (
+											<ul
+												className={cx(
+													"absolute bg-white mt-1 px-4 rounded-lg shadow-md w-full z-50",
+													{
+														hidden: !item.showItems,
+														block: item.showItems
+													}
+												)}
+											>
+												{data.allItems.map(_item => (
+													<li
+														key={_item.id}
+														className="my-4 cursor-pointer hover:font-semibold"
+														onClick={() =>
+															handleItemSelected(
+																_item,
+																index
+															)
+														}
+													>
+														{_item.name}
+													</li>
+												))}
+											</ul>
+										)}
 									</td>
 									<td className="py-6 font-normal text-gray-700 text-right">
 										<input
 											type="text"
 											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-right w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
 											value={item.qty}
+											onChange={e => {
+												handleQtyChanged(e, index);
+											}}
+										/>
+									</td>
+									<td className="py-6 font-normal text-gray-700 text-right">
+										<input
+											type="text"
+											className="bg-white block border-2 border-transparent rounded-lg py-1 px-2 text-right w-full focus:outline-none focus:border-gray-400 hover:border-gray-200"
+											value={item.rate}
+											onChange={e => {
+												handleRateChanged(e, index);
+											}}
 										/>
 									</td>
 									<td className="py-6 font-normal text-gray-700 text-right">
@@ -262,7 +488,7 @@ const NewInvoice = () => {
 								<div className="flex justify-between my-4">
 									<div className="text-gray-700">Total</div>
 									<div className="text-gray-700 font-semibold">
-										$ 0.00
+										$ {invoice.amount}
 									</div>
 								</div>
 							</div>
